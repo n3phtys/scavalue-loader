@@ -1,0 +1,6 @@
+{
+  "intValue": 42,
+  "str": "This is a config",
+  "flag" : false,
+  "floatingpoint": 5.7
+}
