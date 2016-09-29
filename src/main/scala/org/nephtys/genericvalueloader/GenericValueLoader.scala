@@ -12,7 +12,8 @@ case class GenericValueLoader[T](
                                   timeout : Option[() => Long],
                                   serialize : T => String,
                                   deseralize : String => T,
-                                  defaultFunc : Option[() => T]
+                                  defaultFunc : Option[() => T],
+                                  additionalCompare : (T, T) => Boolean
                                 ) extends GenericGetter[T] with GenericSetter[T] {
   override def getValue(): T = {
     valueLastLoad.synchronized(
@@ -22,8 +23,15 @@ case class GenericValueLoader[T](
       val t : T = loadFromFile.getOrElse({
           defaultFunc.getOrElse(throw new NoSuchElementException()).apply()
       })
-      setCacheValue(t)
-      t
+      if (valueLastLoad.isEmpty || !additionalCompare.apply(valueLastLoad.get, t)) {
+        setCacheValue(t)
+        t
+      } else {
+        setCacheValue(valueLastLoad.get)
+        valueLastLoad.get
+      }
+
+
     }
     )
   }

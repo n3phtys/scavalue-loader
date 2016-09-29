@@ -30,6 +30,7 @@ class LoaderSpec extends FlatSpec with Matchers {
 
   val serialFunc : ConfigExample => String = (t : ConfigExample)  =>  upickle.default.write(t)
   val deSerialFunc : String => ConfigExample = read[ConfigExample]
+  val compare : (ConfigExample, ConfigExample) => Boolean = (told : ConfigExample, tnew : ConfigExample) => false
   val default : () => ConfigExample = () => ConfigExample(defaultIntValue, defaultflag, "This is a default value",
      defaultFloatingpoint)
   val normalConfig = ConfigExample(defaultIntValue, defaultflag, defautlstr,
@@ -49,7 +50,7 @@ class LoaderSpec extends FlatSpec with Matchers {
 
     val config = new GenericValueLoader[ConfigExample](() => correctfilename, None, serialize = serialFunc,
       deseralize = deSerialFunc
-      , defaultFunc = defaultOpt)
+      , defaultFunc = defaultOpt, additionalCompare = compare)
     val value = config.getValue
 
     value.flag should be (false)
@@ -59,7 +60,7 @@ class LoaderSpec extends FlatSpec with Matchers {
   it should "throw a NoSuchElementException if default is impossible" in {
     val emptyvalue = new GenericValueLoader[ConfigExample](() => wrongfilename, None, serialize = serialFunc,
       deseralize = deSerialFunc
-      , defaultFunc = None)
+      , defaultFunc = None, additionalCompare = compare)
 
     a [NoSuchElementException] should be thrownBy {
       val v = emptyvalue.getValue
@@ -71,7 +72,7 @@ class LoaderSpec extends FlatSpec with Matchers {
 
     val config = new GenericValueLoader[ConfigExample](() => wrongfilename, None, serialize = serialFunc,
       deseralize = deSerialFunc
-      , defaultFunc = defaultOpt)
+      , defaultFunc = defaultOpt, additionalCompare = compare)
     val value = config.getValue
 
     value should be (defaultval)
@@ -82,7 +83,7 @@ class LoaderSpec extends FlatSpec with Matchers {
 
     val config = new GenericValueLoader[ConfigExample](() => notJsonFile, None, serialize = serialFunc,
       deseralize = deSerialFunc
-      , defaultFunc = defaultOpt)
+      , defaultFunc = defaultOpt, additionalCompare = compare)
     val value = config.getValue
 
     value should be (defaultval)
@@ -94,7 +95,7 @@ class LoaderSpec extends FlatSpec with Matchers {
 
     val config = new GenericValueLoader[ConfigExample](() => wrongJsonFile, None, serialize = serialFunc,
       deseralize = deSerialFunc
-      , defaultFunc = defaultOpt)
+      , defaultFunc = defaultOpt, additionalCompare = compare)
     val value = config.getValue
 
     value should be (defaultval)
@@ -113,7 +114,7 @@ class LoaderSpec extends FlatSpec with Matchers {
 
     val config = new GenericValueLoader[ConfigExample](() => temporaryFile1, None, serialize = serialFunc,
       deseralize = deSerialFunc
-      , defaultFunc = None)
+      , defaultFunc = None, additionalCompare = compare)
 
 
     //load value
@@ -147,7 +148,7 @@ class LoaderSpec extends FlatSpec with Matchers {
 
     val config = new GenericValueLoader[ConfigExample](() => temporaryFile2, Some(() => timeout), serialize = serialFunc,
       deseralize = deSerialFunc
-      , defaultFunc = None)
+      , defaultFunc = None, additionalCompare = compare)
 
 
     //load value
